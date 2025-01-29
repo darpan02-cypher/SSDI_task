@@ -3,7 +3,7 @@ import express from "express";
 // This will help us connect to the database
 import db from "../db/connection.js";
 
-// This help convert the id from string to ObjectId for the _id.
+// This helps convert the id from string to ObjectId for the _id.
 import { ObjectId } from "mongodb";
 
 // router is an instance of the express router.
@@ -18,7 +18,7 @@ router.get("/", async (req, res) => {
   res.send(results).status(200);
 });
 
-// This section will help you get a single record by id
+// This section will help you get a single record by id.
 router.get("/:id", async (req, res) => {
   let collection = await db.collection("records");
   let query = { _id: new ObjectId(req.params.id) };
@@ -66,7 +66,7 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-// This section will help you delete a record
+// This section will help you delete a record.
 router.delete("/:id", async (req, res) => {
   try {
     const query = { _id: new ObjectId(req.params.id) };
@@ -78,6 +78,28 @@ router.delete("/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error deleting record");
+  }
+});
+
+////////Assigmene2-Opensource////
+// This section will help you delete multiple records (bulk delete).
+router.post("/bulk-delete", async (req, res) => {
+  try {
+    const { ids } = req.body; // Expecting an array of IDs in the request body.
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).send("Invalid request. Provide a list of IDs to delete.");
+    }
+
+    const objectIds = ids.map((id) => new ObjectId(id)); // Convert string IDs to ObjectId.
+
+    const collection = db.collection("records");
+    const result = await collection.deleteMany({ _id: { $in: objectIds } }); // Use $in operator to delete matching records.
+
+    res.send({ message: `${result.deletedCount} records deleted successfully.` }).status(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting records.");
   }
 });
 
