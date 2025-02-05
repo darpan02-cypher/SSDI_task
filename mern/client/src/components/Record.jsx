@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import * as XLSX from "xlsx";
 
 export default function Record() {
   const [form, setForm] = useState({
@@ -10,8 +12,58 @@ export default function Record() {
   const [isNew, setIsNew] = useState(true);
   const params = useParams();
   const navigate = useNavigate();
+  const[file, setFile] = useState(null);
+  const[data, setData] = useState([])
+
+   const handleFileUpload = (e) => {
+      const uploadFile = e.target.files[0];
+      
+      setFile(uploadFile);
+      
+
+        const readerData = new FileReader();
+        readerData.readAsBinaryString(uploadFile);
+        readerData.onload = (e) => {
+          const workbook = XLSX.read(e.target.result, { type: "binary" });
+          const sheetName = workbook.SheetNames[0];
+          const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+          console.log(sheetData);
+          setData(sheetData.slice(0, 10)); // Show preview of first 10 rows
+        };
+
+    }
+
+    const handleSubmit =  async () => {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await fetch("http://localhost:5050/record/uploads", {
+          method: "POST",
+          body: formData,
+        });
+        // console.log("File uploaded successfully!");
+        const data = await response.json();
+        console.log("Server Response", data)
+        if(!response.ok){
+          const message = `An error has occurred: ${response.statusText}`;
+          console.error(message);
+          return;
+
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+      }
+
+    }
+
+
+
 
   useEffect(() => {
+    
+    
+     
+    
     async function fetchData() {
       const id = params.id?.toString() || undefined;
       if(!id) return;
@@ -43,7 +95,7 @@ export default function Record() {
     });
   }
 
-  // This function will handle the submission.
+  //This function will handle the submission.
   async function onSubmit(e) {
     e.preventDefault();
     const person = { ...form };
@@ -204,6 +256,46 @@ export default function Record() {
           className="inline-flex items-center justify-center whitespace-nowrap text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 hover:text-accent-foreground h-9 rounded-md px-3 cursor-pointer mt-4"
         />
       </form>
+      <br></br>
+      <div>
+            <h2 className="text-base font-semibold leading-7 text-slate-900">
+                Create Employee Records by uploading a file
+            </h2>
+      </div>
+      <br></br>
+
+        <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8">
+          <div>
+            <input
+                type="file" 
+                accept=".xlsx, .xls"
+                onChange={handleFileUpload}
+            />
+                {data.length > 0 && (
+                  <div>
+                    <br></br>
+                    <br></br>
+                    <table style={{ width: "80%" }}>
+                      <thead border ="0.5">
+                        <tr>{Object.keys(data[0]).map((key) => <th key={key}>{key}</th>)}</tr>
+                      </thead>
+                      <tbody>
+                        {data.map((row, index) => (
+                          <tr key={index}>
+                            {Object.values(row).map((val, i) => <td key={i}>{val}</td>)}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+          </div>
+          <button onClick={handleSubmit}>Upload to MongoDB</button>
+         
+
+
+        </div>
+
     </>
   );
 }
