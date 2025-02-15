@@ -3,7 +3,7 @@ import express from "express";
 // This will help us connect to the database
 import db from "../db/connection.js";
 
-// This help convert the id from string to ObjectId for the _id.
+// This helps convert the id from string to ObjectId for the _id.
 import { ObjectId } from "mongodb";
 
 // router is an instance of the express router.
@@ -18,16 +18,39 @@ router.get("/", async (req, res) => {
   res.send(results).status(200);
 });
 
-// This section will help you get a single record by id
-router.get("/:id", async (req, res) => {
-  let collection = await db.collection("records");
-  let query = { _id: new ObjectId(req.params.id) };
-  let result = await collection.findOne(query);
+router.get("/search", async (req, res) => {
+  const { name, position } = req.query; // Retrieve name and position from query parameters
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  try {
+    if (!name && !position) {
+      return res.status(400).json({ message: "Please provide a name or position to search." });
+    }
+
+    let query = [];
+
+    // Add the name filter if it's provided (prefix match using `^`)
+    if (name) {
+      query.push({ name: { $regex: new RegExp(`^${name}`, 'i') } }); // Case-insensitive match at the beginning
+    }
+
+    // Add the position filter if it's provided (prefix match using `^`)
+    if (position) {
+      query.push({ position: { $regex: new RegExp(`^${position}`, 'i') } }); // Case-insensitive match at the beginning
+    }
+
+    let collection = await db.collection("records");
+    let results = await collection.find({ $or: query }).toArray();
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No records found" });
+    }
+
+    res.status(200).json(results); // Send the results as a JSON response
+  } catch (err) {
+    console.error("Error searching for employees:", err);
+    res.status(500).json({ error: "Error searching records", details: err.message });
+  }
 });
-
 // This section will help you create a new record.
 router.post("/", async (req, res) => {
   try {
@@ -44,6 +67,7 @@ router.post("/", async (req, res) => {
     res.status(500).send("Error adding record");
   }
 });
+
 
 // This section will help you update a record by id.
 router.patch("/:id", async (req, res) => {
