@@ -1,0 +1,204 @@
+/* General styles for the app */
+body {
+  background-color: white; /* Full white background */
+  margin: 0;
+  padding: 0;
+}
+.App {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: white;
+  text-align: center;
+  position: relative;
+}
+
+/* MongoDB logo styles */
+.mongodb-logo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 20px;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+/* Dropdown Button styles */
+.dropdown-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  display: inline-block;
+  vertical-align: middle; /* Align vertically with the text */
+}
+
+/* Dropdown content styles */
+.dropdown-content {
+  display: none; /* Hide initially */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 150px;
+  position: absolute;
+  z-index: 1;
+  top: 100%; /* Position the dropdown directly below the header */
+  left: 0;
+  margin-top: 5px; /* Add a small margin to avoid overlap */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+}
+
+/* Make dropdown visible when active */
+.dropdown-active {
+  display: block;
+}
+
+/* Dropdown label styles */
+.dropdown-content label {
+  display: block;
+  margin: 5px 0;
+}
+
+.dropdown-content input {
+  margin-right: 10px;
+}
+
+/* Table header with relative positioning */
+th {
+  position: relative; /* Make the th element the reference for absolute positioning */
+}
+
+/* Employee Table styles */
+/* Employee Table styles */
+/* Employee Table styles */
+/* Employee Table styles */
+/* Employee Table styles */
+.employee-table {
+  width: 100%; /* Fill the screen horizontally */
+  margin: 120px auto; /* Move the table a little down */
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: none; /* Remove any box shadow */
+}
+
+.employee-table th, .employee-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd; /* Light grey horizontal lines */
+  color: black; /* Keep text color black */
+  background-color: white; /* Ensure full white background */
+  border-right: none !important; /* Remove any vertical lines */
+}
+
+.employee-table th {
+  font-weight: bold;
+  border-bottom: 1px solid #ddd; /* Keep it consistent with rows */
+}
+
+.employee-table tr:last-child td {
+  border-bottom: none; /* Remove bottom border from last row */
+}
+
+.employee-table tr:hover {
+  background-color: white; /* No hover effect */
+}
+
+
+
+.employee-heading {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 20px;
+  position: absolute;
+  top: 80px;
+  left: 20px;
+}
+
+
+/* Button styles */
+.create-employee-button {
+  background-color: white;
+  color: black;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.create-employee-button:hover {
+  background-color: white;
+}
+
+/* Employee Table styles */
+
+
+/* Dropdown Button styles */
+.dropdown-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  display: inline-block;
+  vertical-align: middle; /* Align vertically with the text */
+}
+
+/* Dropdown content styles */
+.dropdown-content {
+  display: none; /* Hide initially */
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 120px;
+  position: absolute;
+  z-index: 1;
+  top: 100%; /* Position the dropdown directly below the header */
+  left: 0;
+}
+
+/* Make dropdown visible when active */
+.dropdown-active {
+  display: block;
+}
+
+.dropdown-content label {
+  display: block;
+  margin: 5px 0;
+}
+
+.dropdown-content input {
+  margin-right: 10px;
+}
+
+/* Table Action buttons */
+.employee-table button {
+  padding: 5px 10px;
+  margin: 5px;
+  border: none;
+  color: black;
+  background-color: white;
+  cursor: pointer;
+}
+
+.employee-table button:hover {
+  background-color: #555;
+}
+.delete-employee-button {
+  background-color: red;  /* Red background */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+  top: 70px;
+  right: 20px;
+}
+
+.delete-employee-button:hover {
+  background-color: darkred;  /* Darker red on hover */
+}
