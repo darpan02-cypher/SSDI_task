@@ -1,1 +1,5 @@
 .env
+
+mern/node_modules/
+mern/client/node_modules/
+mern/server/node_modules/
