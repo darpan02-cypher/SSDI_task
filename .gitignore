@@ -1,0 +1,36 @@
+.env
+.DS_Store
+
+mern/node_modules/
+mern/client/node_modules/
+mern/server/node_modules/
+
+# client
+
+# Logs
+mern/client/logs
+mern/client/*.log
+mern/client/npm-debug.log*
+mern/client/yarn-debug.log*
+mern/client/yarn-error.log*
+mern/client/pnpm-debug.log*
+mern/client/lerna-debug.log*
+
+mern/client/clietdist
+mern/client/dist-ssr
+mern/client/*.local
+
+# Editor directories and files
+mern/client/.vscode/*
+!.vscode/extensions.json
+mern/client/.idea
+mern/client/.DS_Store
+mern/client/*.suo
+mern/client/*.ntvs*
+mern/client/*.njsproj
+mern/client/*.sln
+mern/client/*.sw?
+
+#server
+
+mern/server/.DS_Store
