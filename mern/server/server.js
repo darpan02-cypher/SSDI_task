@@ -1,39 +1,17 @@
-import express from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
+import express from "express";
+import cors from "cors";
+import records from "./routes/record.js";
 
+const PORT = process.env.PORT || 5050;
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
+app.use("/record", records);
 
-mongoose.connect('mongodb://localhost:27017/employeesDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+
+// start the Express server
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });
-
-const EmployeeSchema = new mongoose.Schema({
-  name: String,
-  position: String,
-  level: String,
-});
-
-const Employee = mongoose.model('Employee', EmployeeSchema);
-
-// Fetch employees with optional filtering
-app.get('/employees', async (req, res) => {
-  const { levels } = req.query;
-  let query = {};
-  
-  if (levels) {
-    query.level = { $in: levels.split(',') }; // Convert query string to an array
-  }
-
-  try {
-    const employees = await Employee.find(query);
-    res.json(employees);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch employees' });
-  }
-});
-
-app.listen(5000, () => console.log('Server running on port 5000'));
