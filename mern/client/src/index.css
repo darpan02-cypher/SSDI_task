@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+table, th, td,thead,tbody,tr {
+    border:1px solid black;
+    width: 50%;
+  }
