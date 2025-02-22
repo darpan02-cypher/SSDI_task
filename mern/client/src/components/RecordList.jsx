@@ -1,110 +1,96 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const Record = (props) => (
-  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-    <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-      {props.record.name}
-    </td>
-    <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-      {props.record.position}
-    </td>
-    <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-      {props.record.level}
-    </td>
-    <td className="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">
-      <div className="flex gap-2">
-        <Link
-          className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 h-9 rounded-md px-3"
-          to={`/edit/${props.record._id}`}
-        >
-          Edit
-        </Link>
-        <button
-          className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 hover:text-accent-foreground h-9 rounded-md px-3"
-          color="red"
-          type="button"
-          onClick={() => {
-            props.deleteRecord(props.record._id);
-          }}
+export default function RecordList() {
+  const [records, setRecords] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get("http://localhost:5050/record")
+      .then(response => setRecords(response.data))
+      .catch(error => console.error("Error fetching records:", error));
+  }, []);
+
+  const handleSelectAll = (e) => {
+    setSelectedIds(e.target.checked ? records.map(record => record._id) : []);
+  };
+
+  const handleSelect = (e, id) => {
+    setSelectedIds(e.target.checked ? [...selectedIds, id] : selectedIds.filter(selectedId => selectedId !== id));
+  };
+
+  const handleDelete = (id) => {
+    axios.delete(`http://localhost:5050/record/${id}`)
+      .then(() => setRecords(records.filter(record => record._id !== id)))
+      .catch(error => console.error("Error deleting record:", error));
+  };
+
+  const handleBulkDelete = () => {
+    axios.post("http://localhost:5050/record/bulk-delete", { ids: selectedIds })
+      .then(() => {
+        setRecords(records.filter(record => !selectedIds.includes(record._id)));
+        setSelectedIds([]);
+      })
+      .catch(error => console.error("Error deleting records:", error));
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h3 style={{ fontSize: "20px", marginBottom: "15px", textAlign: "center" }}>Employee Records</h3>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+        <button 
+          onClick={handleBulkDelete} 
+          disabled={selectedIds.length === 0} 
+          style={{ backgroundColor: "red", color: "white", padding: "10px", border: "none", cursor: "pointer", borderRadius: "5px" }}
         >
           Delete
         </button>
       </div>
-    </td>
-  </tr>
-);
 
-export default function RecordList() {
-  const [records, setRecords] = useState([]);
-
-  // This method fetches the records from the database.
-  useEffect(() => {
-    async function getRecords() {
-      const response = await fetch(`http://localhost:5050/record/`);
-      if (!response.ok) {
-        const message = `An error occurred: ${response.statusText}`;
-        console.error(message);
-        return;
-      }
-      const records = await response.json();
-      setRecords(records);
-    }
-    getRecords();
-    return;
-  }, [records.length]);
-
-  // This method will delete a record
-  async function deleteRecord(id) {
-    await fetch(`http://localhost:5050/record/${id}`, {
-      method: "DELETE",
-    });
-    const newRecords = records.filter((el) => el._id !== id);
-    setRecords(newRecords);
-  }
-
-  // This method will map out the records on the table
-  function recordList() {
-    return records.map((record) => {
-      return (
-        <Record
-          record={record}
-          deleteRecord={() => deleteRecord(record._id)}
-          key={record._id}
-        />
-      );
-    });
-  }
-
-  // This following section will display the table with the records of individuals.
-  return (
-    <>
-      <h3 className="text-lg font-semibold p-4">Employee Records</h3>
-      <div className="border rounded-lg overflow-hidden">
-        <div className="relative w-full overflow-auto">
-          <table className="w-full caption-bottom text-sm">
-            <thead className="[&amp;_tr]:border-b">
-              <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Name
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Position
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Level
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&amp;_tr:last-child]:border-0">
-              {recordList()}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
+      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", tableLayout: "fixed" }}>
+        <thead>
+          <tr>
+            <th style={{ width: "5%", border: "1px solid #ddd", padding: "12px", backgroundColor: "#f2f2f2", textAlign: "center" }}>
+              <input type="checkbox" onChange={handleSelectAll} />
+            </th>
+            <th style={{ width: "25%", border: "1px solid #ddd", padding: "12px", backgroundColor: "#f2f2f2" }}>Name</th>
+            <th style={{ width: "25%", border: "1px solid #ddd", padding: "12px", backgroundColor: "#f2f2f2" }}>Position</th>
+            <th style={{ width: "20%", border: "1px solid #ddd", padding: "12px", backgroundColor: "#f2f2f2" }}>Level</th>
+            <th style={{ width: "25%", border: "1px solid #ddd", padding: "12px", backgroundColor: "#f2f2f2", textAlign: "center" }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {records.map(record => (
+            <tr key={record._id} style={{ borderBottom: "1px solid #ddd" }}>
+              <td style={{ border: "1px solid #ddd", padding: "12px", textAlign: "center" }}>
+                <input type="checkbox" checked={selectedIds.includes(record._id)} onChange={(e) => handleSelect(e, record._id)} />
+              </td>
+              <td style={{ border: "1px solid #ddd", padding: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{record.name}</td>
+              <td style={{ border: "1px solid #ddd", padding: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{record.position}</td>
+              <td style={{ border: "1px solid #ddd", padding: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{record.level}</td>
+              <td style={{ border: "1px solid #ddd", padding: "12px", textAlign: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                  <button 
+                    onClick={() => navigate(`/edit/${record._id}`)} 
+                    style={{ padding: "5px 10px", cursor: "pointer", borderRadius: "5px", backgroundColor: "#007bff", color: "white", border: "none" }}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(record._id)} 
+                    style={{ padding: "5px 10px", cursor: "pointer", borderRadius: "5px", backgroundColor: "#dc3545", color: "white", border: "none" }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

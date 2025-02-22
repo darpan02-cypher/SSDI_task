@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "mern/server",
+			"problemMatcher": [],
+			"label": "npm: start - mern/server",
+			"detail": "node --env-file=config.env server",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
-export default function Record() {
+export default function RecordForm() {
   const [form, setForm] = useState({
     name: "",
     position: "",
@@ -14,40 +14,6 @@ export default function Record() {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [data, setData] = useState([]);
-  const [records, setRecords] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
-
-  useEffect(() => {
-    // Fetch records from the server
-    axios.get("/records")
-      .then(response => setRecords(response.data))
-      .catch(error => console.error("Error fetching records:", error));
-  }, []);
-
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedIds(records.map(record => record._id));
-    } else {
-      setSelectedIds([]);
-    }
-  };
-
-  const handleSelect = (e, id) => {
-    if (e.target.checked) {
-      setSelectedIds([...selectedIds, id]);
-    } else {
-      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
-    }
-  };
-
-  const handleDelete = () => {
-    axios.post("/records/bulk-delete", { ids: selectedIds })
-      .then(response => {
-        setRecords(records.filter(record => !selectedIds.includes(record._id)));
-        setSelectedIds([]);
-      })
-      .catch(error => console.error("Error deleting records:", error));
-  };
 
   const handleFileUpload = (e) => {
     const uploadFile = e.target.files[0];
@@ -109,21 +75,18 @@ export default function Record() {
     return;
   }, [params.id, navigate]);
 
-  // These methods will update the state properties.
   function updateForm(value) {
     return setForm((prev) => {
       return { ...prev, ...value };
     });
   }
 
-  // This function will handle the submission.
   async function onSubmit(e) {
     e.preventDefault();
     const person = { ...form };
     try {
       let response;
       if (isNew) {
-        // if we are adding a new record we will POST to /record.
         response = await fetch("http://localhost:5050/record", {
           method: "POST",
           headers: {
@@ -132,7 +95,6 @@ export default function Record() {
           body: JSON.stringify(person),
         });
       } else {
-        // if we are updating a record we will PATCH to /record/:id.
         response = await fetch(`http://localhost:5050/record/${params.id}`, {
           method: "PATCH",
           headers: {
@@ -153,7 +115,6 @@ export default function Record() {
     }
   }
 
-  // This following section will display the form that takes the input from the user.
   return (
     <>
       <h3 className="text-lg font-semibold p-4">Create/Update Employee Record</h3>
@@ -313,29 +274,6 @@ export default function Record() {
         </div>
         <button onClick={handleSubmit}>Upload to MongoDB</button>
       </div>
-
-      <h3 className="text-lg font-semibold p-4">Employee Records</h3>
-      <button onClick={handleDelete} disabled={selectedIds.length === 0}>Delete Selected</button>
-      <table>
-        <thead>
-          <tr>
-            <th><input type="checkbox" onChange={handleSelectAll} /></th>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Department</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Array.isArray(records) && records.map(record => (
-            <tr key={record._id}>
-              <td><input type="checkbox" checked={selectedIds.includes(record._id)} onChange={(e) => handleSelect(e, record._id)} /></td>
-              <td>{record.name}</td>
-              <td>{record.position}</td>
-              <td>{record.department}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </>
   );
 }

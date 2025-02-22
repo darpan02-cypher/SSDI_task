@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import App from "./App";
-import Record from "./components/Record";
+import RecordForm from "./components/RecordForm";
 import RecordList from "./components/RecordList";
 import "./index.css";
 
@@ -18,25 +18,13 @@ const router = createBrowserRouter([
         path: "/",
         element: <RecordList />,
       },
-    ],
-  },
-  {
-    path: "/create",
-    element: <App />,
-    children: [
       {
         path: "/create",
-        element: <Record />,
+        element: <RecordForm />,
       },
-    ],
-  },
-  {
-    path: "/edit/:id",
-    element: <App />,
-    children: [
       {
         path: "/edit/:id",
-        element: <Record />,
+        element: <RecordForm />,
       },
     ],
   },
