@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import EmployeeSearch from "./EmployeeSearch";
 
 export default function RecordList() {
   const [records, setRecords] = useState([]);
@@ -37,6 +38,7 @@ export default function RecordList() {
   };
 
   return (
+    
     <div style={{ padding: "20px" }}>
       <h3 style={{ fontSize: "20px", marginBottom: "15px", textAlign: "center" }}>Employee Records</h3>
 

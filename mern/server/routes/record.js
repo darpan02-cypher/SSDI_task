@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import multer from "multer";
 import xlsx from "xlsx";
 import path from "path";
@@ -33,14 +33,50 @@ router.get("/", async (req, res) => {
   res.send(results).status(200);
 });
 
-router.get("/:id", async (req, res) => {
-  let collection = await db.collection("records");
-  let query = { _id: new ObjectId(req.params.id) };
-  let result = await collection.findOne(query);
+router.get("/search", async (req, res) => {
+  
+  const { name, position } = req.query; // Retrieve name and position from query parameters
 
-  if (!result) res.send("Not found").status(404);
-  else res.send(result).status(200);
+  try {
+    if (!name && !position) {
+      return res.status(400).json({ message: "Please provide a name or position to search." });
+    }
+
+    let query = [];
+
+    // Add the name filter if it's provided (prefix match using `^`)
+    if (name) {
+      query.push({ name: { $regex: new RegExp(`^${name}`, 'i') } }); // Case-insensitive match at the beginning
+    }
+
+    // Add the position filter if it's provided (prefix match using `^`)
+    if (position) {
+      query.push({ position: { $regex: new RegExp(`^${position}`, 'i') } }); // Case-insensitive match at the beginning
+    }
+
+    let collection = await db.collection("records");
+    let results = await collection.find({ $or: query }).toArray();
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No records found" });
+    }
+
+    res.status(200).json(results); // Send the results as a JSON response
+  } catch (err) {
+    console.error("Error searching for employees:", err);
+    res.status(500).json({ error: "Error searching records", details: err.message });
+  }
 });
+
+// router.get("/:id", async (req, res) => {
+//   let collection = await db.collection("records");
+//   let query = { _id: new ObjectId(req.params.id) };
+ 
+//   let result = await collection.findOne(query);
+
+//   if (!result) res.send("Not found").status(404);
+//   else res.send(result).status(200);
+// });
 
 router.post("/", async (req, res) => {
   try {
@@ -107,5 +143,7 @@ router.post("/bulk-delete", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
+
+
 
 export default router;
