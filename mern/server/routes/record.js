@@ -28,13 +28,36 @@ router.post("/uploads", upload.single("file"), async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  let collection = await db.collection("records");
-  let results = await collection.find({}).toArray();
-  res.send(results).status(200);
+  try {
+    let { level } = req.query; // Retrieve level from query parameters
+    let collection = await db.collection("records");
+
+    // Build the query based on the level filter
+    let query = {};
+
+    if (level) {
+      // If 'level' is a comma-separated string (e.g., "junior,senior") - split it into an array
+      if (typeof level === "string" && level.includes(',')) {
+        level = level.split(','); // Convert the string into an array
+      }
+
+      // If level is an array, use the $in operator to filter by multiple levels
+      if (Array.isArray(level)) {
+        query.level = { $in: level }; // Match any of the levels in the array
+      } else {
+        query.level = level; // Single level filter if not an array
+      }
+    }
+
+    let results = await collection.find(query).toArray();
+    res.status(200).json(results); // Send the results as a JSON response
+  } catch (err) {
+    console.error("Error fetching records:", err);
+    res.status(500).json({ error: "Error fetching records", details: err.message });
+  }
 });
 
 router.get("/search", async (req, res) => {
-  
   const { name, position } = req.query; // Retrieve name and position from query parameters
 
   try {
@@ -143,7 +166,5 @@ router.post("/bulk-delete", async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 });
-
-
 
 export default router;
