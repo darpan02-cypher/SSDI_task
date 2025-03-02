@@ -91,16 +91,6 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// router.get("/:id", async (req, res) => {
-//   let collection = await db.collection("records");
-//   let query = { _id: new ObjectId(req.params.id) };
- 
-//   let result = await collection.findOne(query);
-
-//   if (!result) res.send("Not found").status(404);
-//   else res.send(result).status(200);
-// });
-
 router.post("/", async (req, res) => {
   try {
     let newDocument = {
@@ -115,6 +105,15 @@ router.post("/", async (req, res) => {
     console.error(err);
     res.status(500).send("Error adding record");
   }
+});
+router.get("/:id", async (req, res) => {
+  let collection = await db.collection("records");
+  let query = { _id: new ObjectId(req.params.id) };
+ 
+  let result = await collection.findOne(query);
+
+  if (!result) res.send("Not found").status(404);
+  else res.send(result).status(200);
 });
 
 router.patch("/:id", async (req, res) => {
