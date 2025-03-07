@@ -15,21 +15,68 @@ export default function RecordForm() {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [data, setData] = useState([]);
+  const [errors, setErrors] = useState({});
 
-  const handleFileUpload = (e) => {
-    const uploadFile = e.target.files[0];
-    setFile(uploadFile);
+  function validateForm() {
+    let errors = [];
 
-    const readerData = new FileReader();
-    readerData.readAsBinaryString(uploadFile);
-    readerData.onload = (e) => {
+    // Name Validation
+    if (!form.name.trim()) {
+        errors.push("Name is required.");
+    } else if (form.name.length > 25) {
+        errors.push("Name cannot exceed 25 characters.");
+    } else if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(form.name)) {
+        errors.push("Name must contain only alphabets and should not have consecutive spaces.");
+    }
+
+    // Position Validation
+if (!form.position.trim()) {
+  errors.push("Position is required.");
+} else if (form.position.length > 25) {
+  errors.push("Position cannot exceed 25 characters.");
+} else if (!/^(?!.*\s{2})[A-Za-z]+(?: [A-Za-z]+)*(?:-[0-9]+)?$/.test(form.position)) {
+  errors.push("Position must contain only alphabets. If numeric is present, it must be after a hyphen and alphabets must be before the hyphen. No consecutive spaces allowed.");
+}
+
+    if (errors.length > 0) {
+        alert(errors.join("\n")); // Display all errors in an alert
+        console.error(errors.join(" | ")); // Log errors for debugging
+        return false;
+    }
+    return true;
+}
+const handleFileUpload = (e) => {
+  const uploadFile = e.target.files[0];
+  setFile(uploadFile);
+
+  const readerData = new FileReader();
+  readerData.readAsBinaryString(uploadFile);
+  readerData.onload = (e) => {
       const workbook = XLSX.read(e.target.result, { type: "binary" });
       const sheetName = workbook.SheetNames[0];
       const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-      console.log(sheetData);
+
+      if (sheetData.length === 0) {
+          alert("Error: Uploaded file is empty.");
+          return;
+      }
+
+      // Define expected column names
+      const expectedColumns = ["name", "position", "level"];
+      const uploadedColumns = Object.keys(sheetData[0]).map(col => col.toLowerCase());
+
+      // Check if all expected columns exist in the uploaded file
+      const missingColumns = expectedColumns.filter(col => !uploadedColumns.includes(col));
+
+      if (missingColumns.length > 0) {
+          alert(`Error: Missing required columns - ${missingColumns.join(", ")}`);
+          return;
+      }
+
+      console.log("File uploaded successfully:", sheetData);
       setData(sheetData.slice(0, 10)); // Show preview of first 10 rows
-    };
   };
+};
 
   const handleSubmit = async () => {
     const formData = new FormData();
@@ -84,6 +131,7 @@ export default function RecordForm() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (!validateForm()) return;
     const person = { ...form };
     try {
       let response;
